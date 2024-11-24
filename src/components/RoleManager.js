@@ -12,14 +12,19 @@ function RoleManager({ roles, setRoles }) {
     });
 
     const handleAddRole = () => {
-        setCurrentRole({ name: '', permissions: { ...permissions } });
+        setCurrentRole({ name: '', permissions: [] });
         setIsModalOpen(true);
+        setPermissions({ read: false, write: false, delete: false }); // Reset permissions for add role
     };
 
     const handleEditRole = (role) => {
         setCurrentRole(role);
-        setPermissions(role.permissions);
         setIsModalOpen(true);
+        setPermissions({
+            read: role.permissions.includes('read'),
+            write: role.permissions.includes('write'),
+            delete: role.permissions.includes('delete'),
+        }); // Set permissions based on the role being edited
     };
 
     const handleDeleteRole = async (roleId) => {
@@ -48,10 +53,16 @@ function RoleManager({ roles, setRoles }) {
             return;
         }
 
+        const rolePermissions = Object.keys(permissions).filter(permission => permissions[permission]);
+        if (rolePermissions.length === 0) {
+            alert('At least one permission is required.');
+            return;
+        }
+
         if (currentRole.id) {
-            await mockApi.updateRole({ ...currentRole, permissions });
+            await mockApi.updateRole({ ...currentRole, permissions: rolePermissions });
         } else {
-            await mockApi.addRole({ ...currentRole, permissions });
+            await mockApi.addRole({ ...currentRole, permissions: rolePermissions });
         }
         const updatedRoles = await mockApi.getRoles();
         setRoles(updatedRoles);
@@ -60,17 +71,7 @@ function RoleManager({ roles, setRoles }) {
 
     // Handle permission toggling
     const togglePermission = (permission) => {
-        if (currentRole.permissions.includes(permission)) {
-            setCurrentRole({
-                ...currentRole,
-                permissions: currentRole.permissions.filter(p => p !== permission),
-            });
-        } else {
-            setCurrentRole({
-                ...currentRole,
-                permissions: [...currentRole.permissions, permission],
-            });
-        }
+        setPermissions({ ...permissions, [permission]: !permissions[permission] });
     };
 
     return (
@@ -130,7 +131,7 @@ function RoleManager({ roles, setRoles }) {
                                 <label key={perm} className="flex items-center">
                                     <input
                                         type="checkbox"
-                                        checked={currentRole.permissions.includes(perm)}
+                                        checked={permissions[perm]}
                                         onChange={() => togglePermission(perm)}
                                         className="mr-2"
                                     />
