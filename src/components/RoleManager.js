@@ -14,7 +14,7 @@ function RoleManager({ roles, setRoles }) {
     const handleAddRole = () => {
         setCurrentRole({ name: '', permissions: [] });
         setIsModalOpen(true);
-        setPermissions({ read: false, write: false, delete: false }); // Reset permissions for add role
+        setPermissions({ read: false, write: false, delete: false }); 
     };
 
     const handleEditRole = (role) => {
@@ -24,7 +24,7 @@ function RoleManager({ roles, setRoles }) {
             read: role.permissions.includes('read'),
             write: role.permissions.includes('write'),
             delete: role.permissions.includes('delete'),
-        }); // Set permissions based on the role being edited
+        }); 
     };
 
     const handleDeleteRole = async (roleId) => {
